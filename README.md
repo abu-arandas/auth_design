@@ -11,7 +11,7 @@ online_market for android and ios, which you are going to use in this app.
 
 
 
-## Screens
+# Screens
 
 <img src="images/screanshots/main.png" align="left"
 width="30%" hspace="50" vspace="10">
