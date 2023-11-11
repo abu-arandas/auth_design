@@ -2,8 +2,6 @@
 
 # auth_design - Flutter Authentication Design
 
-auth_design is a flutter application supports android and ios.
-online_market for android and ios, which you are going to use in this app.
 
 # Screens
 
