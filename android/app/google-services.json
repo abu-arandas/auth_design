@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "244538908147",
+    "project_id": "alkhatib-market",
+    "storage_bucket": "alkhatib-market.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244538908147:android:bb259b73036c2ddc2e8686",
+        "android_client_info": {
+          "package_name": "com.arandas.auth_design"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "244538908147-pcdil3cs8s4et1jjk4lf4pt1nun8p35t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arandas.auth_design",
+            "certificate_hash": "688bd22e266540bf27e54d217d02906d5d5693ca"
+          }
+        },
+        {
+          "client_id": "244538908147-qupkkv0j7mju9gg6spcc52jrjga700r2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqpZnvOqSQ322eVhPN7cVi01LVU-FDuBA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "244538908147-etqj594d3dnq3jstmi0h5tf4dc7ugqvj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "244538908147-70648k00mmk1jphp2cplp5tfstn2thfg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ui"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244538908147:android:bd232ae19ccc021e2e8686",
+        "android_client_info": {
+          "package_name": "com.arandas.market"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "244538908147-j56qknbeu9fs4svu7dorpmvovsn915t9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arandas.market",
+            "certificate_hash": "688bd22e266540bf27e54d217d02906d5d5693ca"
+          }
+        },
+        {
+          "client_id": "244538908147-qupkkv0j7mju9gg6spcc52jrjga700r2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqpZnvOqSQ322eVhPN7cVi01LVU-FDuBA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "244538908147-etqj594d3dnq3jstmi0h5tf4dc7ugqvj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "244538908147-70648k00mmk1jphp2cplp5tfstn2thfg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ui"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

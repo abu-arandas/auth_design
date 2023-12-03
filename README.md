@@ -1,11 +1,14 @@
-![](images/logo.png)
+![](images/screanshots/cover.jpg)
 
-# auth_design - Flutter Authentication Design
-
-
-# Screens
-
-<img src="images/screanshots/main.png" align="left"
-width="30%" hspace="50" vspace="10"><img src="images/screanshots/sign_in.png" align="center"
-width="30%" hspace="50" vspace="10"><img src="images/screanshots/sign_up.png" align="right"
-width="30%" hspace="50" vspace="10">
+<table>
+  <tr>
+    <td><img src="images/screanshots/Screenshot_1701626053-portrait.png"></td>
+    <td><img src="images/screanshots/Screenshot_1701626064-portrait.png"></td>
+    <td><img src="images/screanshots/Screenshot_1701626005-portrait.png"></td>
+  </tr>
+  <tr>
+    <td><img src="images/screanshots/Screenshot_1701626075-portrait.png"></td>
+    <td><img src="images/screanshots/Screenshot_1701626090-portrait.png"></td>
+    <td><img src="images/screanshots/Screenshot_1701626105-portrait.png"></td>
+  </tr>
+</table>
