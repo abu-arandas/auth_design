@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:auth_design/widgets/background.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-import 'sign_up.dart';
 import 'profile.dart';
+import 'sign_up.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -17,60 +20,120 @@ class _SignInState extends State<SignIn> {
 
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  TextEditingController forgetPasswordEmail = TextEditingController();
 
-  bool obscureText = false;
+  bool obscureText = true;
 
   @override
   void dispose() {
     super.dispose();
-
     email.dispose();
     password.dispose();
+    forgetPasswordEmail.dispose();
+  }
+
+  Future<void> signInWithGoogle() async {
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      if (googleAuth != null) {
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        navigator.pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const Profile(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+              position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+              child: child,
+            ),
+          ),
+          (route) => false,
+        );
+      }
+    } on FirebaseAuthException catch (error) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(error.message.toString())),
+      );
+    }
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            height: MediaQuery.sizeOf(context).height,
-            child: Center(
-              child: SizedBox(
-                width: 500,
-                child: Form(
-                  key: signInFormState,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Spacer(),
-                      ListTile(
-                        title: Text(
-                          'Sign In',
-                          style: Theme.of(context).textTheme.displayMedium!.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: const Text('enter your email and password to sign'),
-                      ),
-                      const Spacer(flex: 2),
-
-                      // Email
-                      TextFormField(
+  Widget build(BuildContext context) {
+    return AuthBackground(
+      child: Form(
+        key: signInFormState,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sign In',
+              style: Theme.of(context).textTheme.displaySmall!.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 32),
+            TextFormField(
+              autofillHints: const [AutofillHints.email],
+              controller: email,
+              decoration: const InputDecoration(labelText: 'Email'),
+              enableSuggestions: true,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'empty';
+                } else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                  return 'not a valid email address';
+                } else {
+                  return null;
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              autofillHints: const [AutofillHints.password],
+              controller: password,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  onPressed: () => setState(() => obscureText = !obscureText),
+                  icon: Icon(obscureText ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye, size: 18),
+                ),
+              ),
+              enableSuggestions: true,
+              keyboardType: TextInputType.visiblePassword,
+              obscureText: obscureText,
+              textInputAction: TextInputAction.done,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'empty';
+                } else if (value.length < 6) {
+                  return 'less than 6';
+                } else {
+                  return null;
+                }
+              },
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Reset Password'),
+                    content: Form(
+                      key: forgetPasswordFormState,
+                      child: TextFormField(
                         autofillHints: const [AutofillHints.email],
-                        controller: email,
+                        controller: forgetPasswordEmail,
                         decoration: const InputDecoration(labelText: 'Email'),
                         enableSuggestions: true,
                         keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        onChanged: (value) {
-                          if (value.isEmpty) {
-                            'empty';
-                          } else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
-                            'not a valid email address';
-                          } else {
-                            null;
-                          }
-                        },
+                        textInputAction: TextInputAction.done,
                         validator: (value) {
                           if (value!.isEmpty) {
                             return 'empty';
@@ -81,133 +144,17 @@ class _SignInState extends State<SignIn> {
                           }
                         },
                       ),
-                      const SizedBox(height: 16),
-
-                      // Password
-                      TextFormField(
-                        autofillHints: const [AutofillHints.password],
-                        controller: password,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          suffixIcon: IconButton(
-                            onPressed: () => setState(() => obscureText = !obscureText),
-                            icon: Icon(obscureText ? Icons.remove_red_eye : Icons.lock),
-                          ),
-                        ),
-                        enableSuggestions: true,
-                        keyboardType: TextInputType.visiblePassword,
-                        obscureText: obscureText,
-                        textInputAction: TextInputAction.done,
-                        onChanged: (value) {
-                          if (value.isEmpty) {
-                            'empty';
-                          } else if (value.length < 6) {
-                            'less than 6';
-                          } else {
-                            null;
-                          }
-                        },
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'empty';
-                          } else if (value.length < 6) {
-                            return 'less than 6';
-                          } else {
-                            return null;
-                          }
-                        },
-                      ),
-
-                      // Forget Password
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(
-                                'Enter your email to get the reset password link',
-                                style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              content: Form(
-                                key: forgetPasswordFormState,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: TextFormField(
-                                    autofillHints: const [AutofillHints.email],
-                                    controller: email,
-                                    decoration: const InputDecoration(labelText: 'Email'),
-                                    enableSuggestions: true,
-                                    keyboardType: TextInputType.emailAddress,
-                                    textInputAction: TextInputAction.done,
-                                    onChanged: (value) {
-                                      if (value.isEmpty) {
-                                        'empty';
-                                      } else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
-                                        'not a valid email address';
-                                      } else {
-                                        null;
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return 'empty';
-                                      } else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
-                                        return 'not a valid email address';
-                                      } else {
-                                        return null;
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                              actions: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    if (forgetPasswordFormState.currentState!.validate()) {
-                                      try {
-                                        FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
-
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('check your inbox')),
-                                        );
-                                      } on FirebaseAuthException catch (error) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(error.message.toString())),
-                                        );
-                                      }
-
-                                      Navigator.pop(context);
-                                    }
-                                  },
-                                  child: const Text('Send'),
-                                ),
-                              ],
-                            ),
-                          ),
-                          child: const Text('Forget Password'),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Sign In
+                    ),
+                    actions: [
                       ElevatedButton(
                         onPressed: () {
-                          if (signInFormState.currentState!.validate()) {
+                          if (forgetPasswordFormState.currentState!.validate()) {
                             try {
-                              FirebaseAuth.instance
-                                  .signInWithEmailAndPassword(email: email.text, password: password.text)
-                                  .then((value) => Navigator.pushAndRemoveUntil(
-                                        context,
-                                        PageRouteBuilder(
-                                          pageBuilder: (context, animation, secondaryAnimation) => const Profile(),
-                                          transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
-                                            position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
-                                            child: child,
-                                          ),
-                                        ),
-                                        (route) => false,
-                                      ));
+                              FirebaseAuth.instance.sendPasswordResetEmail(email: forgetPasswordEmail.text);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('check your inbox')),
+                              );
                             } on FirebaseAuthException catch (error) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(error.message.toString())),
@@ -215,38 +162,71 @@ class _SignInState extends State<SignIn> {
                             }
                           }
                         },
-                        child: const Text('Sign In'),
+                        child: const Text('Send'),
                       ),
-                      const Spacer(flex: 2),
-
-                      // Sign Up
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Text('don\'t have an account?'),
-                          TextButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder: (context, animation, secondaryAnimation) => const SignUp(),
-                                transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
-                                  position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
-                                  child: child,
-                                ),
-                              ),
-                            ),
-                            child: const Text('Sign Up'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16)
                     ],
                   ),
                 ),
+                child: const Text('Forget Password'),
               ),
             ),
-          ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                if (signInFormState.currentState!.validate()) {
+                  try {
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(email: email.text, password: password.text);
+                    navigator.pushAndRemoveUntil(
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) => const Profile(),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+                          position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+                          child: child,
+                        ),
+                      ),
+                      (route) => false,
+                    );
+                  } on FirebaseAuthException catch (error) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text(error.message.toString())),
+                    );
+                  }
+                }
+              },
+              child: const Text('Sign In'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: signInWithGoogle,
+              icon: const Icon(FontAwesomeIcons.google),
+              label: const Text('Sign in with Google'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const Text('don\'t have an account?'),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) => const SignUp(),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+                        position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+                        child: child,
+                      ),
+                    ),
+                  ),
+                  child: const Text('Sign Up'),
+                ),
+              ],
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

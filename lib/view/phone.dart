@@ -128,6 +128,7 @@ class _PhoneAuthState extends State<PhoneAuth> {
           },
         );
       } on FirebaseAuthException catch (error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message.toString())));
       }
     } else {
@@ -136,18 +137,22 @@ class _PhoneAuthState extends State<PhoneAuth> {
             .signInWithCredential(
               PhoneAuthProvider.credential(verificationId: verification, smsCode: pin.text),
             )
-            .then((value) => Navigator.pushAndRemoveUntil(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => const Profile(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
-                      position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
-                      child: child,
-                    ),
-                  ),
-                  (route) => false,
-                ));
+            .then((value) {
+          if (!mounted) return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => const Profile(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+                position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+                child: child,
+              ),
+            ),
+            (route) => false,
+          );
+        });
       } on FirebaseAuthException catch (error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message.toString())));
       }
     }
