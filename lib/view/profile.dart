@@ -64,17 +64,21 @@ class _ProfileState extends State<Profile> {
           ),
           actions: [
             IconButton(
-              onPressed: () => FirebaseAuth.instance.signOut().then((value) => Navigator.pushAndRemoveUntil(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
-                        position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
-                        child: child,
-                      ),
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                if (!context.mounted) return;
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+                      position: animation.drive(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+                      child: child,
                     ),
-                    (route) => false,
-                  )),
+                  ),
+                  (route) => false,
+                );
+              },
               icon: const Icon(Icons.logout),
             ),
           ],
@@ -225,13 +229,19 @@ class _ProfileState extends State<Profile> {
                                   phoneNumber: phone.value!.international,
                                   verificationCompleted: (PhoneAuthCredential credential) async =>
                                       FirebaseAuth.instance.signInWithCredential(credential),
-                                  verificationFailed: (FirebaseAuthException error) =>
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message.toString()))),
+                                  verificationFailed: (FirebaseAuthException error) {
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message.toString())));
+                                  },
                                   codeSent: (String verificationId, int? resendToken) => setState(() => verification = verificationId),
                                   codeAutoRetrievalTimeout: (String verificationId) => setState(() => verification = verificationId),
                                 )
-                                .then((value) => pinAlert());
+                                .then((value) {
+                              if (!mounted) return;
+                              pinAlert();
+                            });
                           } on FirebaseAuthException catch (error) {
+                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message.toString())));
                           }
                         },
@@ -260,15 +270,16 @@ class _ProfileState extends State<Profile> {
           ),
           actions: [
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (pinFormState.currentState!.validate()) {
                   try {
-                    FirebaseAuth.instance
-                        .signInWithCredential(
-                          PhoneAuthProvider.credential(verificationId: verification, smsCode: pin.text),
-                        )
-                        .then((value) => Navigator.pop(context));
+                    await FirebaseAuth.instance.signInWithCredential(
+                      PhoneAuthProvider.credential(verificationId: verification, smsCode: pin.text),
+                    );
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
                   } on FirebaseAuthException catch (error) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message.toString())));
                   }
                 }
